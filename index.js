@@ -1,16 +1,16 @@
 const express = require("express");
 const cors = require("cors");
+require("dotenv").config();
+
 const { MongoClient, ObjectId } = require("mongodb");
 
 const app = express();
 const port = process.env.PORT || 5000;
 
-
 app.use(cors());
 app.use(express.json());
 
-
-const uri = "mongodb+srv://pawMartDB:SvCcMjBipBW60fKl@mycluster.xjvt9bg.mongodb.net/pawMartDB?retryWrites=true&w=majority";
+const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@mycluster.xjvt9bg.mongodb.net/pawMartDB?retryWrites=true&w=majority`;
 const client = new MongoClient(uri);
 
 async function run() {
@@ -21,7 +21,6 @@ async function run() {
 
     console.log("✅ MongoDB connected");
 
-
     app.post("/martProducts", async (req, res) => {
       try {
         const data = req.body;
@@ -30,10 +29,11 @@ async function run() {
         res.send({ success: true, result });
       } catch (error) {
         console.error(error);
-        res.status(500).send({ success: false, message: "Failed to add product" });
+        res
+          .status(500)
+          .send({ success: false, message: "Failed to add product" });
       }
     });
-
 
     app.get("/martProducts", async (req, res) => {
       try {
@@ -43,42 +43,45 @@ async function run() {
         res.send({ success: true, result });
       } catch (error) {
         console.error(error);
-        res.status(500).send({ success: false, message: "Failed to fetch listings" });
+        res
+          .status(500)
+          .send({ success: false, message: "Failed to fetch listings" });
       }
     });
-
 
     app.get("/martProducts/:id", async (req, res) => {
       try {
         const id = req.params.id;
-        const result = await productCollection.findOne({ _id: new ObjectId(id) });
+        const result = await productCollection.findOne({
+          _id: new ObjectId(id),
+        });
         res.send({ success: true, result });
       } catch (error) {
         console.error(error);
-        res.status(500).send({ success: false, message: "Failed to fetch product" });
+        res
+          .status(500)
+          .send({ success: false, message: "Failed to fetch product" });
       }
     });
 
-   
-
-
-    
     app.delete("/martProducts/:id", async (req, res) => {
       try {
         const id = req.params.id;
-        const result = await productCollection.deleteOne({ _id: new ObjectId(id) });
+        const result = await productCollection.deleteOne({
+          _id: new ObjectId(id),
+        });
         res.send({ success: true, result });
       } catch (error) {
         console.error(error);
-        res.status(500).send({ success: false, message: "Failed to delete listing" });
+        res
+          .status(500)
+          .send({ success: false, message: "Failed to delete listing" });
       }
     });
-
 
     app.get("/", (req, res) => {
       res.send("Server is running successfully");
     });
-
   } catch (err) {
     console.error(err);
   }
