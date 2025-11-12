@@ -11,8 +11,6 @@ app.use(cors());
 app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@mycluster.xjvt9bg.mongodb.net/pawMartDB?retryWrites=true&w=majority`;
-console.log("DB_USERNAME:", process.env.DB_USERNAME);
-console.log("DB_PASSWORD:", process.env.DB_PASSWORD);
 
 const client = new MongoClient(uri);
 
@@ -21,6 +19,7 @@ async function run() {
     await client.connect();
     const db = client.db("pawMartDB");
     const productCollection = db.collection("martProducts");
+    const orderCollection = db.collection("order");
 
     app.post("/martProducts", async (req, res) => {
       try {
@@ -94,6 +93,33 @@ async function run() {
         res
           .status(500)
           .send({ success: false, message: "Failed to update listing" });
+      }
+    });
+
+    app.post("/orders", async (req, res) => {
+      try {
+        const order = req.body;
+        const result = await orderCollection.insertOne(order);
+        res.send({ success: true, result });
+      } catch (error) {
+        console.error(error);
+        res
+          .status(500)
+          .send({ success: false, message: "Failed to place order" });
+      }
+    });
+
+    app.get("/orders", async (req, res) => {
+      try {
+        const email = req.query.email;
+        const query = email ? { buyerEmail: email } : {};
+        const result = await orderCollection.find(query).toArray();
+        res.send({ success: true, result });
+      } catch (error) {
+        console.error(error);
+        res
+          .status(500)
+          .send({ success: false, message: "Failed to load orders" });
       }
     });
 
