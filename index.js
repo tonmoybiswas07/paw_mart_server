@@ -11,6 +11,9 @@ app.use(cors());
 app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@mycluster.xjvt9bg.mongodb.net/pawMartDB?retryWrites=true&w=majority`;
+console.log("DB_USERNAME:", process.env.DB_USERNAME);
+console.log("DB_PASSWORD:", process.env.DB_PASSWORD);
+
 const client = new MongoClient(uri);
 
 async function run() {
@@ -18,8 +21,6 @@ async function run() {
     await client.connect();
     const db = client.db("pawMartDB");
     const productCollection = db.collection("martProducts");
-
-    console.log("✅ MongoDB connected");
 
     app.post("/martProducts", async (req, res) => {
       try {
@@ -76,6 +77,23 @@ async function run() {
         res
           .status(500)
           .send({ success: false, message: "Failed to delete listing" });
+      }
+    });
+
+    app.put("/martProducts/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const updatedData = req.body;
+        const result = await productCollection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: updatedData }
+        );
+        res.send({ success: true, result });
+      } catch (error) {
+        console.error(error);
+        res
+          .status(500)
+          .send({ success: false, message: "Failed to update listing" });
       }
     });
 
