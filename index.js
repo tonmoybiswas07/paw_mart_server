@@ -1,22 +1,17 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
+
 const app = express();
 const port = process.env.PORT || 5000;
+
 
 app.use(cors());
 app.use(express.json());
 
-const uri =
-  "mongodb+srv://pawMartDB:SvCcMjBipBW60fKl@mycluster.xjvt9bg.mongodb.net/?appName=myCluster";
 
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  },
-});
+const uri = "mongodb+srv://pawMartDB:SvCcMjBipBW60fKl@mycluster.xjvt9bg.mongodb.net/pawMartDB?retryWrites=true&w=majority";
+const client = new MongoClient(uri);
 
 async function run() {
   try {
@@ -24,32 +19,73 @@ async function run() {
     const db = client.db("pawMartDB");
     const productCollection = db.collection("martProducts");
 
-    app.get("/martProducts", async (req, res) => {
-      const result = await productCollection.find().toArray();
-      res.send(result);
+    console.log("✅ MongoDB connected");
+
+
+    app.post("/martProducts", async (req, res) => {
+      try {
+        const data = req.body;
+        console.log("POST data:", data); // check ownerEmail
+        const result = await productCollection.insertOne(data);
+        res.send({ success: true, result });
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ success: false, message: "Failed to add product" });
+      }
     });
+
+
+    app.get("/martProducts", async (req, res) => {
+      try {
+        const email = req.query.ownerEmail;
+        const query = email ? { ownerEmail: email } : {};
+        const result = await productCollection.find(query).toArray();
+        res.send({ success: true, result });
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ success: false, message: "Failed to fetch listings" });
+      }
+    });
+
 
     app.get("/martProducts/:id", async (req, res) => {
-      const { id } = req.params;
-      console.log(id);
-      const objectId = new ObjectId(id);
-      const result = await productCollection.findOne({ _id: objectId });
-      res.send(result);
+      try {
+        const id = req.params.id;
+        const result = await productCollection.findOne({ _id: new ObjectId(id) });
+        res.send({ success: true, result });
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ success: false, message: "Failed to fetch product" });
+      }
     });
 
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
-  } finally {
+   
+
+
+    
+    app.delete("/martProducts/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const result = await productCollection.deleteOne({ _id: new ObjectId(id) });
+        res.send({ success: true, result });
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ success: false, message: "Failed to delete listing" });
+      }
+    });
+
+
+    app.get("/", (req, res) => {
+      res.send("Server is running successfully");
+    });
+
+  } catch (err) {
+    console.error(err);
   }
 }
+
 run().catch(console.dir);
 
-app.get("/", (req, res) => {
-  res.send("server is running succesfully");
-});
-
 app.listen(port, () => {
-  console.log(`server is listening on port ${port}`);
+  console.log(`Server is listening on port ${port}`);
 });
