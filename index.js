@@ -16,7 +16,7 @@ const client = new MongoClient(uri);
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
     const db = client.db("pawMartDB");
     const productCollection = db.collection("martProducts");
     const orderCollection = db.collection("order");
@@ -24,7 +24,7 @@ async function run() {
     app.post("/martProducts", async (req, res) => {
       try {
         const data = req.body;
-        console.log("POST data:", data); // check ownerEmail
+        console.log("POST data:", data); 
         const result = await productCollection.insertOne(data);
         res.send({ success: true, result });
       } catch (error) {
