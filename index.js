@@ -123,6 +123,17 @@ async function run() {
       }
     });
 
+    app.get("/products/category/:categoryName", async (req, res) => {
+      const categoryName = req.params.categoryName
+        .replace(/-/g, " ")
+        .toLowerCase();
+      const query = {
+        category: { $regex: new RegExp("^" + categoryName + "$", "i") },
+      };
+      
+      res.send(result);
+    });
+
     app.get("/", (req, res) => {
       res.send("Server is running successfully");
     });
