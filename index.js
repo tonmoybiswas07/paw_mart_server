@@ -130,7 +130,7 @@ async function run() {
       const query = {
         category: { $regex: new RegExp("^" + categoryName + "$", "i") },
       };
-      
+      const result = await productCollection.find(query).toArray();
       res.send(result);
     });
 
