@@ -2,6 +2,10 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
+// Vercel Speed Insights integration
+const { injectSpeedInsights } = require("@vercel/speed-insights");
+injectSpeedInsights();
+
 const { MongoClient, ObjectId } = require("mongodb");
 
 const app = express();
