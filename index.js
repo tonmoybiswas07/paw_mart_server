@@ -10,13 +10,16 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@mycluster.xjvt9bg.mongodb.net/pawMartDB?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${process.env.USERNAME}:${process.env.PASSWORD}@mycluster.xjvt9bg.mongodb.net/pawMartDB?retryWrites=true&w=majority`;
 
 const client = new MongoClient(uri);
+console.log(process.env.USERNAME);
+console.log(process.env.PASSWORD ? "PASSWORD OK" : "NO PASSWORD");
+
 
 async function run() {
   try {
-    // await client.connect();
+    await client.connect();
     const db = client.db("pawMartDB");
     const productCollection = db.collection("martProducts");
     const orderCollection = db.collection("order");
